@@ -20,5 +20,11 @@
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@types/dotenv": "^8.2.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "dotenv": "^17.2.1",
+    "jsonwebtoken": "^9.0.2"
   }
 }

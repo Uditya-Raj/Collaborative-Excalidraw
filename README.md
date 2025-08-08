@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Turborepo starter
 
 This Turborepo starter is maintained by the Turborepo core team.
@@ -133,3 +134,6 @@ Learn more about the power of Turborepo:
 - [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
 - [Configuration Options](https://turborepo.com/docs/reference/configuration)
 - [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+=======
+This is moreover clone of Excalidraw with added feature like multi-user support 
+>>>>>>> aeef654bb2b4e0d45e2736359e8027cd07028140
