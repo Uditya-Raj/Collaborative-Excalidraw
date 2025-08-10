@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import dotenv, { parse } from "dotenv";
 import jwt  from "jsonwebtoken";
 import express from "express";
 import { middleware } from "./middleware";
@@ -8,34 +8,60 @@ const app = express();
 dotenv.config();
 const jwtSecret = process.env.JWT_SECRET;
 
-app.get("/signup", (req, res) => {
+app.use(express.json())
+app.post("/signup", async (req, res) => {
   // zod validation
-  const data  = CreateUserSchema.safeParse(req.body);
-  if(!data.success){
+  const parsedData  = CreateUserSchema.safeParse(req.body);
+  if(!parsedData.success){
      return res.json({
         message:"Incorrect inputs"
      })
   }
+
    //db call
-   res.json({
-     userId : "123"
+   try{
+    const user = await prismaClient.user.create({
+     data: {
+        email : parsedData.data.username,
+        password : parsedData.data.password,
+        name : parsedData.data.name
+     }
    })
+   res.json({
+     userId : user.id
+   })
+}catch(e){
+    res.status(411).json({
+        message : "User already exists with this username. "
+    })
+}
 });
 
-app.get("/signin", (req, res) => {
+app.get("/signin", async (req, res) => {
 
-      const data = SigninSchema.safeParse(req.body);
-      if (!data.success) {
+      const parsedData = SigninSchema.safeParse(req.body);
+      if (!parsedData.success) {
         return res.json({
           message: "Incorrect inputs",
         });
       }
-     const userId = 1;
+        const user = await prismaClient.user.findFirst({
+         where: {
+             email : parsedData.data.username,
+             password : parsedData.data.password
+         }
+      })
+      if(!user){
+        res.status(403).json({
+            message:"user not found"
+        })
+        return
+      }
      if(!jwtSecret){
         throw new Error("JWT_SECRET environment variable is required");
      }
      const token = jwt.sign({
-        userId:userId
+        userId:user?.id
      },jwtSecret)
 
      res.json({
@@ -43,21 +69,34 @@ app.get("/signin", (req, res) => {
      })
 });
 
-app.get("/room",middleware ,(req, res) => {
+app.get("/room",middleware , async (req, res) => {
 
-     const data = CreateRoomSchema  .safeParse(req.body);
-     if (!data.success) {
+     const parsedData = CreateRoomSchema.safeParse(req.body);
+     if (!parsedData.success) {
        return res.json({
          message: "Incorrect inputs",
        });
      }
+      //@ts-ignore
+     const userId = req.userId;
     // db call
-
+    try{
+       const room = await prismaClient.room.create({
+         data : {
+            slug : parsedData.data.name,
+            adminId : userId
+         }
+       })
     res.json({
-        roomId: 123
+        roomId: room.id
     })
+} catch(e){
+    res.status(411).json({
+        message: "room already exists with this name."
+    })
+}
 });
 
 app.listen(3008, () => {
-  console.log("listening on port 3000");
+  console.log("listening on port 3008");
 });
